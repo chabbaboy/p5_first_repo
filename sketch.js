@@ -1,23 +1,172 @@
+var f=[];
+var numberFish= 2;
 
-var rotationAngle = 0;
-var scalar = 40;
-var speed = 0.02;
+var fishData = {
+  speed: 10,
+  spedVariation: 0.4
+};
 
-function setup() {
-  createCanvas(windowWidth,windowHeight);
-  fill(0);
+
+var springing = 0.00009, damping = 0.989;
+ 
+var b=[];
+var numberBubbles=37;
+var img;
+
+
+function preload() {
+  img=loadImage("sea2.jpg");
+}
+function setup() { 
+
+  createCanvas(img.width, img.height);
+  noStroke(); 
+  
+  //adds 50 fish to the array
+  for (var i=0; i<numberFish; i++) {
+      f.push(new Fish());
+  }
+  
+  //adds 20 bubbles to the array
+  for(var g=0; g<numberBubbles; g++){
+       b.push(new Bubble());     
+  }  
+} 
+
+function draw() { 
+
+  image(img,0,0); 
+
+  for (var g=0; g<b.length; g++){
+    b[g].move();
+    b[g].draw();
+  } 
+
+  for (var i=0; i<f.length; i++){  if (frameCount%60===0)  console.log("mousex ", mouseX," x/y", f[i].x+"/"+f[i].y )    
+    f[i].moveTowards();
+    f[i].draw();
+  }   
+}
+
+
+
+function Fish(){
+
+  this.x= random (0,width);
+  this.y=random (0,height);
+  this.isMoving = false;
+
+  // following params
+  this.accelX = 0.0;
+  this.accelY = 0.0;
+  this.deltaX = 0.0;
+  this.deltaY = 0.0;
+
+  this.speed=random(fishData.speed,fishData.speed + fishData.spedVariation);
+
+  //determines whether it moves right or left
+  if (random (-1,1) <0) {  
+    this.speed *= -1; //if it moves left speed will be a negative number  
+  }
+  this.size=random (25,30);
+  this.r=random (0,255);
+  this.g=random (0,255);
+  this.b=random (0,255);
+
+  // draw a fish with moving tail
+  this.draw=function(){
+
+    fill (this.r, this.g, this.b);    
+    
+    push();    
+   
+    translate(this.x,this.y);
+
+    if((this.x-mouseX)>0){
+      rotate(PI);    
+    }
+
+    var jitter = (this.isMoving ) ? random(0,this.size*0.2): 0;
+
+    ellipse (0, 0, this.size*2, this.size); 
+    translate(-this.size,0);   
+
+    beginShape();
+    curveVertex(-this.size, -this.size/2 + jitter);
+    curveVertex(-this.size, this.size/2 + jitter);
+    curveVertex(0,0);
+    endShape(CLOSE);
+
+    pop();
+    
+  };
+
+  this.swim = function(){
+    this.x += this.speed;
+    if (this.accelX<= 0.01 || this.x >=this.accely<= 0.01) {
+        this.speed *= -1;      
+    }
+  };
+
+  this.moveTowards = function() {
+    //move center point
+    this.deltaX = mouseX-this.x;
+    this.deltaY = mouseY-this.y;
+  
+    // create springing effect
+    this.deltaX *= springing;
+    this.deltaY *= springing;
+
+    this.accelX += this.deltaX;
+    this.accelY += this.deltaY;
+  
+    // move predator's center
+    this.x += this.accelX;
+    this.y += this.accelY;
+  
+    // slow down springing
+    this.accelX *= damping;
+    this.accelY *= damping;
+
+    
+    if (abs(this.accelX )<= 0.001 && abs(this.accelY )<= 0.001 ) {
+      this.isMoving=false;
+    } else {
+      this.isMoving=true; 
+    }  
+    // change curve tightness
+    organicConstant = 1-((abs(this.accelX)+abs(this.accelY))*0.1);
+  
+    //move nodes
+    this.x = this.x + sin(radians(2))*(this.accelX*2);
+    this.y = this.y + sin(radians(2))*(this.accelY*2);   
+  
+  }
+
+
+}
+
+function Bubble(){
+   this.x=random (0,width);
+   this.size= random (3,15);
+   this.y=height+random(this.size*2,this.size*20);
+   this.speed= 1;
   
 }
 
-function draw() {
-  background(255);
-  var y1 = sin(rotationAngle) * scalar   + 100
-  var y2 = sin(rotationAngle + 0.8) * scalar   + 100
-  var y3 = sin(rotationAngle + 1.8) * scalar   + 100
-  
-  ellipse(100,y1 , 50)
-  ellipse(200,y2 , 50)
-  ellipse(300,y3 , 50)
+Bubble.prototype.constructor=Bubble;
+Bubble.prototype.move= function (){
+       this.y-=this.speed;
+  if (this.y<-this.size*2){
+   this.y=height+random(this.size*2,this.size*20);
+  } 
+};
 
- rotationAngle+=speed;
-}
+Bubble.prototype.draw=function(){
+       fill(255,255,255,75);
+      ellipse(this.x,this.y,this.size,this.size);
+        
+};
+
+
+
