@@ -44,7 +44,7 @@ function draw() {
 
   for (var i=0; i<f.length; i++){  if (frameCount%60===0)  console.log("mousex ", mouseX," x/y", f[i].x+"/"+f[i].y )    
     f[i].moveTowards();
-    f[i].draw();
+    f[i].draw();   
   }   
 }
 
@@ -52,9 +52,11 @@ function draw() {
 
 function Fish(){
 
+  this.guid=create_UUID();
   this.x= random (0,width);
   this.y=random (0,height);
   this.isMoving = false;
+  this.intersertWithAnother = false;
 
   // following params
   this.accelX = 0.0;
@@ -109,6 +111,8 @@ function Fish(){
   };
 
   this.moveTowards = function() {
+
+    this.intersertWithAnother = false;
     //move center point
     this.deltaX = mouseX-this.x;
     this.deltaY = mouseY-this.y;
@@ -137,13 +141,43 @@ function Fish(){
     // change curve tightness
     organicConstant = 1-((abs(this.accelX)+abs(this.accelY))*0.1);
   
+
     //move nodes
-    this.x = this.x + sin(radians(2))*(this.accelX*2);
-    this.y = this.y + sin(radians(2))*(this.accelY*2);   
-  
+    var movementX = sin(radians(2))*(this.accelX*2);
+    var movementY = sin(radians(2))*(this.accelY*2);
+
+    
+
+    for (var i=0; i<f.length; i++){     
+      
+      if (this.intersects(f[i])) {
+        this.intersertWithAnother = true; 
+
+      }
+    }
+    
+    if (this.intersertWithAnother){
+      if (frameCount%60===0) {  console.log("inteSECTTT/" ) }   
+    
+    } else {
+      this.x = this.x + movementX;
+      this.y = this.y + movementY; 
+
+    }
   }
 
-
+  this.intersects = function (anotherObject){  
+    
+      if(this.guid != anotherObject.guid)
+      var d= dist(this.x, this.y, anotherObject.x, anotherObject.y);
+  
+      if (d<( this.size + anotherObject.size)){       
+        
+        return true;
+      } else {
+        return false;
+      }
+  }
 }
 
 function Bubble(){
@@ -169,4 +203,12 @@ Bubble.prototype.draw=function(){
 };
 
 
-
+function create_UUID(){
+  var dt = new Date().getTime();
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = (dt + Math.random()*16)%16 | 0;
+      dt = Math.floor(dt/16);
+      return (c=='x' ? r :(r&0x3|0x8)).toString(16);
+  });
+  return uuid;
+}
