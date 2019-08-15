@@ -1,5 +1,5 @@
 var f=[];
-var numberFish=15;
+var numberFish=25;
 var realTempFishes = [];
 var realFishes = [];
 
