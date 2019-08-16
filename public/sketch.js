@@ -17,9 +17,11 @@ var positionX, positionY;
 socket = io.connect('http://192.168.1.28:3000')
   socket.on('mousePosition', function (data) {
 
-    console.log('xxxxx',data.x);
-    positionX = data.x;
-    positionY = data.y;
+    var sizeScaling =1920/600;
+    
+    positionX = data.x*sizeScaling;
+    positionY = data.y*sizeScaling;
+    console.log(data);
   });
 
 function preload() {
