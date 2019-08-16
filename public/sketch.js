@@ -14,7 +14,7 @@ var soundsBubbles1;
 
 var positionX, positionY;
 
-socket = io.connect('http://localhost:3000')
+socket = io.connect('http://192.168.1.28:3000')
   socket.on('mousePosition', function (data) {
 
     console.log('xxxxx',data.x);
